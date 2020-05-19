@@ -1,0 +1,23 @@
+{
+  "name": "desk-manager",
+  "version": "1.0.0",
+  "description": "Swap file in and out of your desktop folder.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/_electron@9.0.0@electron/dist/Electron.app/Contents/MacOS/Electron .",
+    "start": "node_modules/_electron@9.0.0@electron/dist/Electron.app/Contents/MacOS/Electron ."
+  },
+  "author": "Shauna Zhang",
+  "license": "MIT",
+  "dependencies": {
+    "electron-prompt": "^1.5.1",
+    "fs-extra": "^9.0.0",
+    "menubar": "^8.0.2"
+  },
+  "devDependencies": {
+    "electron": "^9.0.0",
+    "electron-packager": "^14.2.1",
+    "fs-extra": "^9.0.0",
+    "menubar": "^8.0.2"
+  }
+}
