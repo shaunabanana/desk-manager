@@ -11,13 +11,11 @@
   "license": "MIT",
   "dependencies": {
     "electron-prompt": "^1.5.1",
-    "fs-extra": "^9.0.0",
-    "menubar": "^8.0.2"
+    "fs-extra": "^9.0.0"
   },
   "devDependencies": {
     "electron": "^9.0.0",
     "electron-packager": "^14.2.1",
-    "fs-extra": "^9.0.0",
-    "menubar": "^8.0.2"
+    "fs-extra": "^9.0.0"
   }
 }

@@ -2,7 +2,6 @@ const fs = require('fs-extra');
 const path = require('path');
 
 const { app, Menu, Tray } = require('electron');
-const { menubar } = require('menubar');
 
 
 const iconPath = path.join(__dirname, 'assets', 'icon.png');
@@ -10,6 +9,8 @@ const workspacePath = path.join(app.getPath('home'), 'Desktop Workspaces');
 const defaultPath = path.join(workspacePath, 'Default Workspace');
 const desktopPath = path.join(app.getPath('home'), 'Desktop');
 const configPath = path.join(desktopPath, '.workspaceName');
+
+app.dock.hide();
 
 function moveFiles(src, dest, callback) {
     const files = fs.readdirSync(src);
@@ -118,15 +119,9 @@ function buildContextMenu() {
 
 app.on('ready', () => {
     const tray = new Tray(iconPath);
-    //tray.setPressedImage(iconClickedPath);
     tray.setTitle("Switch workspace");
-    tray.setContextMenu(buildContextMenu());
-    const mb = menubar({
-        tray,
-    });
-
-    mb.on('ready', () => {
-        
-        // your app code here
+    tray.setIgnoreDoubleClickEvents(true);
+    tray.on('click', () => {
+        tray.popUpContextMenu(buildContextMenu());
     });
 });
