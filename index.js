@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const { app, Menu, Tray } = require('electron');
+const { app, Menu, Tray, BrowserWindow, ipcMain } = require('electron');
 
 
 const iconPath = path.join(__dirname, 'assets', 'icon.png');
@@ -10,7 +10,38 @@ const defaultPath = path.join(workspacePath, 'Default Workspace');
 const desktopPath = path.join(app.getPath('home'), 'Desktop');
 const configPath = path.join(desktopPath, '.workspaceName');
 
+// Hide the app icon in macOS dock.
 app.dock.hide();
+// Disable quitting when window all closed.
+app.on('window-all-closed', () => {});
+
+ipcMain.on('create-workspace', (event, name) => {
+    if (!fs.existsSync(path.join(workspacePath, name))) {
+        fs.mkdirSync(path.join(workspacePath, name));
+        fs.writeFileSync(path.join(workspacePath, name, '.workspaceName'), name);
+    }
+});
+
+function newWorkspace () {
+    let win = new BrowserWindow({ 
+        width: 300, 
+        height: 120,
+        frame: false,
+        resizable: false,
+        movable: false,
+        minimizable: false,
+        maximizable: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    console.log(path.join(__dirname, 'index.html'));
+    win.loadFile('index.html');
+    win.on('closed', () => {
+        win = null
+    })
+}
 
 function moveFiles(src, dest, callback) {
     const files = fs.readdirSync(src);
@@ -19,6 +50,7 @@ function moveFiles(src, dest, callback) {
         fs.move(
             path.join(src, file),
             path.join(dest, file),
+            {overwrite: true},
             err => {
                 if (err) {
                     console.log('Duplicates');
@@ -52,7 +84,7 @@ function putbackClicked(menuItem) {
 function workspaceClicked(workspace) {
     const currentWorkspace = fs.readFileSync(configPath, 'utf-8');
     let workspaceFolderPath = path.join(workspacePath, currentWorkspace);
-    if (currentWorkspace.length > 0) {
+    if (currentWorkspace != 'Default Workspace') {
         moveFiles(desktopPath, workspaceFolderPath, () => {
             for (let item of workspace.menu.items) {
                 if (item.type == 'checkbox') item.checked = false;
@@ -88,6 +120,10 @@ function buildContextMenu() {
     console.log(currentWorkspace)
 
     const template = [
+        { 
+            label: 'New workspace', 
+            click: newWorkspace
+        },
         { 
             label: 'Put everything back', 
             click: putbackClicked,

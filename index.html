@@ -1,0 +1,43 @@
+<html>
+<head>
+    <link rel="stylesheet" href="css/photon.css">
+    <style>
+        .window {
+            padding: 1em;
+        }
+
+        .buttons {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='window'>
+        <div class="form-group">
+            <label>Enter a name for the workspace:</label>
+            <input type="text" id="workspace-name" class="form-control" placeholder="Workspace name">
+        </div>
+        <div class='buttons'>
+            <button id="cancel" class="btn btn-default">Cancel</button>
+            <button id="submit" class="btn btn-primary">OK</button>
+        </div>
+        </form>
+    </div>
+
+    <script>
+        const {ipcRenderer} = require('electron')
+
+        document.getElementById('workspace-name').focus();
+        document.getElementById('cancel').addEventListener('click', function() {
+            window.close();
+        });
+        document.getElementById('submit').addEventListener('click', function() {
+            if (document.getElementById('workspace-name').value.length > 0) {
+                ipcRenderer.send('create-workspace', document.getElementById('workspace-name').value);
+            }
+            window.close();
+        });
+    </script>
+</body>
+</html>
