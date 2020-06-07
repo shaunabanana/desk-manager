@@ -108,6 +108,10 @@ function workspaceClicked(workspace) {
 }
 
 function buildContextMenu() {
+    if (!fs.existsSync(workspacePath)) {
+        fs.mkdirSync(workspacePath);
+    }
+
     if (!fs.existsSync(defaultPath)) {
         fs.mkdirSync(defaultPath);
     }
@@ -160,4 +164,13 @@ app.on('ready', () => {
     tray.on('click', () => {
         tray.popUpContextMenu(buildContextMenu());
     });
+
+    var AutoLaunch = require('auto-launch');
+
+    var selfAutoLauncher = new AutoLaunch({
+        name: 'DeskManager',
+        path: '/Applications/DeskManager.app',
+    });
+
+    selfAutoLauncher.enable();
 });
