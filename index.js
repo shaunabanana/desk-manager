@@ -4,11 +4,13 @@ const path = require('path');
 const { app, Menu, Tray, BrowserWindow, ipcMain } = require('electron');
 
 
-const iconPath = path.join(__dirname, 'assets', 'icon.png');
+const iconPath = path.join(__dirname, 'assets', 'IconTemplate.png');
 const workspacePath = path.join(app.getPath('home'), 'Desktop Workspaces');
 const defaultPath = path.join(workspacePath, 'Default Workspace');
 const desktopPath = path.join(app.getPath('home'), 'Desktop');
 const configPath = path.join(desktopPath, '.workspaceName');
+
+let tray;
 
 // Hide the app icon in macOS dock.
 app.dock.hide();
@@ -79,6 +81,8 @@ function putbackClicked(menuItem) {
         fs.writeFileSync(configPath, 'Default Workspace');
         menuItem.enabled = false;
     });
+
+    tray.setTitle("Switch Workspace");
 }
 
 function workspaceClicked(workspace) {
@@ -105,6 +109,7 @@ function workspaceClicked(workspace) {
             fs.writeFileSync(configPath, workspace.label);
         });
     }
+    tray.setTitle(workspace.label);
 }
 
 function buildContextMenu() {
@@ -158,19 +163,10 @@ function buildContextMenu() {
 
 
 app.on('ready', () => {
-    const tray = new Tray(iconPath);
+    tray = new Tray(iconPath);
     tray.setTitle("Switch workspace");
     tray.setIgnoreDoubleClickEvents(true);
     tray.on('click', () => {
         tray.popUpContextMenu(buildContextMenu());
     });
-
-    var AutoLaunch = require('auto-launch');
-
-    var selfAutoLauncher = new AutoLaunch({
-        name: 'DeskManager',
-        path: '/Applications/DeskManager.app',
-    });
-
-    selfAutoLauncher.enable();
 });
