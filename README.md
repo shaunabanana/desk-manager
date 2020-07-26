@@ -1,5 +1,9 @@
 # desk-manager
  A macOS app that swaps files in and out of your desktop folder.
+ 
+## Download
+[Click here](https://github.com/shaunabanana/desk-manager/releases/download/β-0.1/DeskManager-beta-0.1.zip) for the newest version.
+For all versions, see the [Releases](https://github.com/shaunabanana/desk-manager/releases) page.
 
 ## Usage
 * Place the app file in `/Applications`, and launch the app. Upon the first launch, you will likely be asked for permission to access your desktop folder. This is for swapping the files.
