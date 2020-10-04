@@ -2,7 +2,7 @@
  A macOS app that swaps files in and out of your desktop folder.
  
 ## Download
-[Click here](https://github.com/shaunabanana/desk-manager/releases/download/β-0.1/DeskManager-beta-0.1.zip) for the newest version.
+[Click here](https://github.com/shaunabanana/desk-manager/releases/download/β-0.2/DeskManager-darwin-x64.zip) for the newest version.
 For all versions, see the [Releases](https://github.com/shaunabanana/desk-manager/releases) page.
 
 ## Usage
