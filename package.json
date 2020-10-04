@@ -4,8 +4,8 @@
   "description": "Swap file in and out of your desktop folder.",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/_electron@9.0.0@electron/dist/Electron.app/Contents/MacOS/Electron .",
-    "start": "node_modules/_electron@9.0.0@electron/dist/Electron.app/Contents/MacOS/Electron ."
+    "test": "node_modules/electron/dist/Electron.app/Contents/MacOS/Electron .",
+    "start": "node_modules/electron/dist/Electron.app/Contents/MacOS/Electron ."
   },
   "author": "Shauna Zhang",
   "license": "MIT",
