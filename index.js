@@ -188,6 +188,7 @@ function buildContextMenu() {
         { type: 'separator' }
     ]
     const workspaces = fs.readdirSync(workspacePath, {withFileTypes: true});
+    workspaces.sort((a, b) => a.name.localeCompare(b.name));
     for (workspace of workspaces) {
         if (workspace.isDirectory() && workspace.name !== 'Default Workspace') {
             template.push({
