@@ -137,6 +137,9 @@ function workspaceClicked(workspace) {
     console.log('Switching to workspace:', workspace.label);
     const currentWorkspaceId = fs.readFileSync(configPath, 'utf-8');
     const currentWorkspace = findNameById(currentWorkspaceId);
+
+    // TODO: Add error checking code in case there's no ID
+
     let workspaceFolderPath = findPathById(currentWorkspaceId);
 
     if (currentWorkspace !== 'Default Workspace') {
@@ -206,7 +209,7 @@ function buildContextMenu() {
         role: 'quit'
     });
 
-    tray.setTitle(currentWorkspace === 'Default Workspace' ? "Switch workspace" : currentWorkspace);
+    tray.setTitle(currentWorkspace === 'Default Workspace' ? "Switch Workspace" : currentWorkspace);
 
     return Menu.buildFromTemplate(template);
 }
@@ -247,7 +250,7 @@ app.on('ready', () => {
     console.log('Starting up. Current workspace is:', currentWorkspace);
     
     tray = new Tray(iconPath);
-    tray.setTitle(currentWorkspace && currentWorkspace !== 'Default Workspace' ? currentWorkspace : "Switch workspace");
+    tray.setTitle(currentWorkspace && currentWorkspace !== 'Default Workspace' ? currentWorkspace : "Switch Workspace");
     tray.setIgnoreDoubleClickEvents(true);
     tray.on('click', () => {
         tray.popUpContextMenu(buildContextMenu());
