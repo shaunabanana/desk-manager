@@ -135,6 +135,9 @@ function putbackClicked(menuItem) {
 
 function workspaceClicked(workspace) {
     console.log('Switching to workspace:', workspace.label);
+    if (!fs.existsSync(configPath)) {
+        generateIds();
+    }
     const currentWorkspaceId = fs.readFileSync(configPath, 'utf-8');
     const currentWorkspace = findNameById(currentWorkspaceId);
 
