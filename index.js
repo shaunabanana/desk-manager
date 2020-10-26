@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
-var shortid = require('shortid');
+const shortid = require('shortid');
+const Store = require('electron-store');
 
 const { app, Menu, Tray, BrowserWindow, ipcMain } = require('electron');
 
@@ -12,10 +13,9 @@ const desktopPath = path.join(app.getPath('home'), 'Desktop');
 const configPath = path.join(desktopPath, '.workspace');
 const defaultConfigPath = path.join(defaultPath, '.workspace');
 
-let defaultId = '';
-
-
 let tray;
+let store = new Store();
+let defaultId = '';
 
 // Hide the app icon in macOS dock.
 app.dock.hide();
