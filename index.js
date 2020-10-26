@@ -5,13 +5,12 @@ const Store = require('electron-store');
 
 const { app, Menu, Tray, BrowserWindow, ipcMain } = require('electron');
 
-
-const iconPath = path.join(__dirname, 'assets', 'IconTemplate.png');
-const workspacePath = path.join(app.getPath('home'), 'Desktop Workspaces');
-const defaultPath = path.join(workspacePath, 'Default Workspace');
-const desktopPath = path.join(app.getPath('home'), 'Desktop');
-const configPath = path.join(desktopPath, '.workspace');
-const defaultConfigPath = path.join(defaultPath, '.workspace');
+let iconPath = path.join(__dirname, 'assets', 'IconTemplate.png');
+let workspacePath = path.join(app.getPath('home'), 'Desktop Workspaces');
+let defaultPath = path.join(workspacePath, 'Default Workspace');
+let desktopPath = path.join(app.getPath('home'), 'Desktop');
+let configPath = path.join(desktopPath, '.workspace');
+let defaultConfigPath = path.join(defaultPath, '.workspace');
 
 let tray;
 let store = new Store();
@@ -29,6 +28,23 @@ ipcMain.on('create-workspace', (event, name) => {
     }
 });
 
+ipcMain.on('update-preference', (event, key, value) => {
+    if (key === 'general.autostart') {
+        app.setLoginItemSettings({
+            openAtLogin: value,
+            path: app.getPath("exe")
+        });
+    } else if (key === 'locations.workspaces') {
+        buildPaths();
+    }
+});
+
+function showPreferences () {
+    console.log('Showing preferences');
+    console.log(preferences);
+    preferences.show();
+}
+
 function newWorkspace () {
     let win = new BrowserWindow({ 
         width: 300, 
@@ -43,7 +59,24 @@ function newWorkspace () {
             nodeIntegration: true
         }
     });
-    win.loadFile('index.html');
+    win.loadFile('windows/new-workspace.html');
+    win.on('closed', () => {
+        win = null
+    })
+}
+
+function showPreferences () {
+    let win = new BrowserWindow({ 
+        title: 'Preferences',
+        width: 700, 
+        height: 300,
+        minimizable: false,
+        maximizable: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    win.loadFile('windows/preferences.html');
     win.on('closed', () => {
         win = null
     })
@@ -207,6 +240,10 @@ function buildContextMenu() {
     }
 
     template.push({ type: 'separator' });
+    template.push({ 
+        label: 'Preferences...', 
+        click: showPreferences,
+    });
     template.push({
         label: 'Quit',
         role: 'quit'
@@ -218,7 +255,31 @@ function buildContextMenu() {
 }
 
 
+function buildPaths() {
+    workspacePath = store.get('locations.workspaces');
+    defaultPath = path.join(workspacePath, 'Default Workspace');
+    desktopPath = path.join(app.getPath('home'), 'Desktop');
+    configPath = path.join(desktopPath, '.workspace');
+    defaultConfigPath = path.join(defaultPath, '.workspace');
+}
+
+
 app.on('ready', () => {
+    console.log('Current config file path is:', store.path);
+    if (!fs.existsSync(store.path)) {
+        console.log('No current config. Generating new one.');
+        store.store = {
+            general: {
+                autostart: false
+            },
+            locations: {
+                workspaces: path.join(app.getPath('home'), 'Desktop Workspaces')
+            }
+        }
+    }
+
+    buildPaths();
+    
     // Make "Desktop Workspaces" folder if doesn't exist.
     if (!fs.existsSync(workspacePath)) {
         fs.mkdirSync(workspacePath);
@@ -250,7 +311,7 @@ app.on('ready', () => {
         fs.writeFileSync(configPath, defaultId);
         currentWorkspace = findNameById(fs.readFileSync(configPath, 'utf-8'));
     }
-    console.log('Starting up. Current workspace is:', currentWorkspace);
+    console.log('Current workspace is:', currentWorkspace);
     
     tray = new Tray(iconPath);
     tray.setTitle(currentWorkspace && currentWorkspace !== 'Default Workspace' ? currentWorkspace : "Switch Workspace");
