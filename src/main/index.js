@@ -1,11 +1,12 @@
-const fs = require('fs-extra');
-const path = require('path');
-const shortid = require('shortid');
+import { app, Menu, Tray, BrowserWindow, ipcMain } from 'electron'
+import fs from 'fs-extra'
+import path from 'node:path'
+import { nanoid } from 'nanoid'
+
+import iconPath from '../../resources/icons/IconTemplate.png?asset'
+
 const Store = require('electron-store');
 
-const { app, Menu, Tray, BrowserWindow, ipcMain } = require('electron');
-
-let iconPath = path.join(__dirname, 'assets', 'IconTemplate.png');
 let workspacePath = path.join(app.getPath('home'), 'Desktop Workspaces');
 let defaultPath = path.join(workspacePath, 'Default Workspace');
 let desktopPath = path.join(app.getPath('home'), 'Desktop');
@@ -16,15 +17,18 @@ let tray;
 let store = new Store();
 let defaultId = '';
 
+
 // Hide the app icon in macOS dock.
 app.dock.hide();
 // Disable quitting when window all closed.
 app.on('window-all-closed', () => {});
 
+// Functions
+
 ipcMain.on('create-workspace', (event, name) => {
     if (!fs.existsSync(path.join(workspacePath, name))) {
         fs.mkdirSync(path.join(workspacePath, name));
-        fs.writeFileSync(path.join(workspacePath, name, '.workspace'), shortid.generate());
+        fs.writeFileSync(path.join(workspacePath, name, '.workspace'), nanoid());
     }
 });
 
@@ -39,27 +43,32 @@ ipcMain.on('update-preference', (event, key, value) => {
     }
 });
 
-function showPreferences () {
-    console.log('Showing preferences');
-    console.log(preferences);
-    preferences.show();
-}
+// function showPreferences () {
+//     console.log('Showing preferences');
+//     console.log(preferences);
+//     preferences.show();
+// }
 
 function newWorkspace () {
     let win = new BrowserWindow({ 
         width: 300, 
         height: 120,
         frame: false,
-        resizable: false,
+        // resizable: false,
         movable: false,
         minimizable: false,
         maximizable: false,
         alwaysOnTop: true,
         webPreferences: {
-            nodeIntegration: true
+            preload: path.join(__dirname, '../preload/index.mjs'),
+            sandbox: false
         }
     });
-    win.loadFile('windows/new-workspace.html');
+    if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
+        win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/new-workspace.html`)
+    } else {
+        win.loadFile(path.join(__dirname, '../renderer/new-workspace.html'))
+    }
     win.on('closed', () => {
         win = null
     })
@@ -73,10 +82,15 @@ function showPreferences () {
         minimizable: false,
         maximizable: false,
         webPreferences: {
-            nodeIntegration: true
+            preload: path.join(__dirname, '../preload/index.mjs'),
+            sandbox: false
         }
     });
-    win.loadFile('windows/preferences.html');
+    if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
+        win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/preferences.html`)
+    } else {
+        win.loadFile(path.join(__dirname, '../renderer/preferences.html'))
+    }
     win.on('closed', () => {
         win = null
     })
@@ -88,7 +102,7 @@ function generateIds() {
         if (workspace.isDirectory()) {
             var idPath = path.join(workspacePath, workspace.name, '.workspace');
             if (!fs.existsSync(idPath)) {
-                fs.writeFileSync(idPath, shortid.generate());
+                fs.writeFileSync(idPath, nanoid());
             }
         }
     }
@@ -228,7 +242,7 @@ function buildContextMenu() {
     ]
     const workspaces = fs.readdirSync(workspacePath, {withFileTypes: true});
     workspaces.sort((a, b) => a.name.localeCompare(b.name));
-    for (workspace of workspaces) {
+    for (let workspace of workspaces) {
         if (workspace.isDirectory() && workspace.name !== 'Default Workspace') {
             template.push({
                 label: workspace.name,
@@ -263,6 +277,7 @@ function buildPaths() {
     defaultConfigPath = path.join(defaultPath, '.workspace');
 }
 
+// Startup code
 
 app.on('ready', () => {
     console.log('Current config file path is:', store.path);
@@ -292,7 +307,7 @@ app.on('ready', () => {
 
     // Make .workspace file in default workspace if doesn't exist, and set defaultId.
     if (!fs.existsSync(defaultConfigPath)) {
-        defaultId = shortid.generate();
+        defaultId = nanoid();
         fs.writeFileSync(defaultConfigPath, defaultId);
     } else {
         defaultId = fs.readFileSync(defaultConfigPath, 'utf-8');

@@ -26,15 +26,13 @@
     </div>
 
     <script>
-        const {ipcRenderer} = require('electron')
-
         document.getElementById('workspace-name').focus();
         document.getElementById('cancel').addEventListener('click', function() {
             window.close();
         });
         document.getElementById('submit').addEventListener('click', function() {
             if (document.getElementById('workspace-name').value.length > 0) {
-                ipcRenderer.send('create-workspace', document.getElementById('workspace-name').value);
+                window.electron.ipcRenderer.send('create-workspace', document.getElementById('workspace-name').value);
             }
             window.close();
         });

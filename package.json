@@ -1,24 +1,38 @@
 {
-  "name": "desk-manager",
+  "name": "unmix",
   "version": "1.0.0",
-  "description": "Swap file in and out of your desktop folder.",
-  "main": "index.js",
+  "description": "A minimal Electron application with JavaScript",
+  "type": "module",
+  "main": "./out/main/index.js",
+  "author": "Shengchen Zhang",
+  "homepage": "https://electron-vite.org",
   "scripts": {
-    "test": "node_modules/electron/dist/Electron.app/Contents/MacOS/Electron .",
-    "start": "node_modules/electron/dist/Electron.app/Contents/MacOS/Electron ."
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux"
   },
-  "author": "Shauna Zhang",
-  "license": "MIT",
   "dependencies": {
-    "electron-preferences": "^2.0.0",
-    "electron-store": "^6.0.1",
-    "fs-extra": "^9.0.0",
-    "shortid": "^2.2.15"
+    "@electron-toolkit/preload": "^3.0.0",
+    "@electron-toolkit/utils": "^3.0.0",
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.1.7",
+    "nanoid": "^5.0.6"
   },
   "devDependencies": {
-    "electron": "^9.0.0",
-    "electron-packager": "^14.2.1",
-    "fs-extra": "^9.0.0",
-    "shortid": "^2.2.15"
+    "@electron-toolkit/eslint-config": "^1.0.2",
+    "@electron-toolkit/eslint-config-prettier": "^2.0.0",
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1",
+    "electron-vite": "^2.0.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "vite": "^5.0.12"
   }
 }

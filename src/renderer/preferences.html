@@ -1,4 +1,104 @@
-/*!
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/photon.css">
+    <!-- <script src="libs/vue.js" ></script> -->
+    <style>
+        .pane.main {
+            padding: 1rem;
+        }
+
+        .label {
+            margin-bottom: 10px;
+        }
+
+        .file input, .folder input {
+            width: 70%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='window' id="app">
+        <div class="window-content">
+            <div class="pane-group">
+                <div class="pane-sm sidebar">
+                    <ul class="list-group">
+                        <li class="list-group-header">
+                            <input class="form-control" type="text" placeholder="Search for preference here..." v-model="currentSearch">
+                        </li>
+
+                        <li class="list-group-item" 
+                        v-for="(pane, i) in panes" :key="i"
+                        :class="{active: i === currentPane}"
+                        @click="currentPane = i">
+                        
+                            <div class="img-circle media-object pull-left" style="width: 32px; height: 32px; text-align: center;">
+                                <span class="icon" :class="[pane.icon]" style="font-size: 24px;"></span>
+                            </div>
+                            <div class="media-body">
+                                <strong>{{ pane.name }}</strong>
+                                <p>{{ pane.description }}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="pane main">
+                    <div class="container" v-for="(control, i) in panes[currentPane].content">
+                        <div class="checkbox" v-if="control.type === 'checkbox'">
+                            <label>
+                                <input type="checkbox" :checked="control.value"
+                                @change="updatePreference(control.key, $event.target.checked)">
+                                {{ control.label }}
+                            </label>
+                        </div>
+
+                        <div class="radio" v-if="control.type === 'radio'">
+                            <label>
+                                <input type="radio" :name="control.name">
+                                {{ control.label }}
+                            </label>
+                        </div>
+
+                        <div class="label" v-if="control.type === 'label'">
+                            <span style="font-weight: bold;"> {{ control.label }} </span>
+                        </div>
+
+                        <div class="file" v-if="control.type === 'file'">
+                            <span>
+                                <input type="text" class="form-control" placeholder="A file path goes here..." v-model="control.value">
+                                <button class="btn btn-form btn-large btn-default" 
+                                @click="selectFile(control.key, control.key)">
+                                    Select...
+                                </button>
+                                <input :id="control.key" type="file" name="name" style="display: none;"/>
+                            </span>
+                        </div>
+
+                        <div class="folder" v-if="control.type === 'folder'">
+                            <span>
+                                <input type="text" class="form-control" placeholder="A folder path goes here..." v-model="control.value">
+                                <button class="btn btn-form btn-large btn-default" @click="selectFolder(control.key)">Select...</button>
+                                <input :id="control.key" type="file" name="name" style="display: none;" @change="selectedFolder(control.key, $event)" webkitdirectory directory/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // import Store from 'electron-store'
+        // const path = require('path');
+        // const Store = require('electron-store');
+        // const { ipcRenderer } = require('electron');
+        // const { dialog } = require('electron').remote
+
+        // const storeObject = window.store;
+
+        /*!
  * Vue.js v2.6.12
  * (c) 2014-2020 Evan You
  * Released under the MIT License.
@@ -11963,3 +12063,95 @@
   return Vue;
 
 }));
+
+
+        let app = new Vue({
+            el: '#app',
+            data: {
+                currentPane: 0,
+                currentSearch: '',
+                panes: [
+                    {
+                        name: 'General',
+                        description: 'General behavior of the app.',
+                        icon: 'icon-cog',
+                        content: [
+                            {
+                                type: 'label',
+                                label: 'Startup'
+                            },
+                            {
+                                type: 'checkbox',
+                                label: 'Automatically start with the system.',
+                                key: 'general.autostart',
+                                value: window.api.get('general.autostart') ? window.api.get('general.autostart') : false
+                            }
+                        ]
+                    },
+                    {
+                        name: 'Locations',
+                        description: 'Where things are stored.',
+                        icon: 'icon-folder',
+                        content: [
+                            {
+                                type: 'label',
+                                label: 'Workspaces'
+                            },
+                            {
+                                type: 'folder',
+                                label: '',
+                                key: 'locations.workspaces',
+                                value: window.api.get('locations.workspaces') ? window.api.get('locations.workspaces') : ''
+                            }
+                        ]
+                    },
+                ]
+            },
+            methods: {
+                updatePreference(key, value) {
+                    for (let pane of this.panes) {
+                        for (let control of pane.content) {
+                            console.log(control.key);
+                            if (control.key === key) {
+                                control.value = value;
+                                break;
+                            }
+                        }
+                    }
+                    window.api.set(key, value);
+                    window.electron.ipcRenderer.send('update-preference', key, value);
+                },
+
+                selectFile(id) {
+                    document.getElementById(id).click();
+                },
+
+                selectedFile(key, file) {
+                    console.log(file.target.files[0].path);
+                },
+
+                selectFolder(key, id) {
+                    dialog.showOpenDialog({
+                        properties: ['openDirectory']
+                    }).then((test) => {
+                        this.updatePreference(key, test.filePaths[0]);
+                    })
+                }
+            }
+        })
+
+        // document.getElementById('workspace-name').focus();
+        // document.getElementById('cancel').addEventListener('click', function () {
+        //     window.close();
+        // });
+        // document.getElementById('submit').addEventListener('click', function () {
+        //     if (document.getElementById('workspace-name').value.length > 0) {
+        //         ipcRenderer.send('create-workspace', document.getElementById('workspace-name').value);
+        //     }
+        //     window.close();
+        // });
+        
+    </script>
+</body>
+
+</html>
